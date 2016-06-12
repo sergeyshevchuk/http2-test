@@ -2,6 +2,9 @@
 
 const spdy = require('spdy');
 const fs = require('fs');
+const path = require('path');
+
+const afterLastSlash = /[^\/]*$/;
 
 let options = {
     key: fs.readFileSync(__dirname + '/server.key'),
@@ -14,7 +17,9 @@ spdy.createServer(options, function(req, res) {
         fs.createReadStream('it.html').pipe(res);
     } else if(req.url.includes('images')){
     	res.writeHead(200);
-    	fs.createReadStream('./images/1').pipe(res);			
+    	const imageId = req.url.match(afterLastSlash)[0];
+    	const imagePath = path.resolve('./images', imageId)
+    	fs.createReadStream(imagePath).pipe(res);			
     } else {
     	res.writeHead(200);
     	res.end('Hello world over HTTP/2');	
