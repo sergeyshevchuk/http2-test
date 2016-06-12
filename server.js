@@ -1,6 +1,6 @@
 'use strict'
 
-const spdy = require('http2');
+const spdy = require('spdy');
 const fs = require('fs');
 
 let options = {
@@ -8,8 +8,15 @@ let options = {
     cert: fs.readFileSync(__dirname + '/server.crt')
 };
 
-require('http2').createServer(options, function(req, res) {
-    res.writeHead(200);
-    console.log(req);
-    res.end('Hello world over HTTP/2');
+spdy.createServer(options, function(req, res) {
+	if (req.url === '/it') {
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        fs.createReadStream('it.html').pipe(res);
+    } else if(req.url.includes('images')){
+    	res.writeHead(200);
+    	fs.createReadStream('./images/1').pipe(res);			
+    } else {
+    	res.writeHead(200);
+    	res.end('Hello world over HTTP/2');	
+    }  
 }).listen(3000);
