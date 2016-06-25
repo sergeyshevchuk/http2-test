@@ -1,8 +1,21 @@
 'use strict'
 
-const spdy = require('spdy');
 const fs = require('fs');
 const path = require('path');
+
+let protocolName;
+
+function initHttp1() {
+    protocolName = 'HTTPS/1';
+    return require('https');       
+}
+
+function initHttp2() {
+    protocolName = 'HTTP/2';
+    return require('spdy');       
+}
+
+const PROTOCOL = process.argv[2] === 'https' ? initHttp1() : initHttp2()
 
 const afterLastSlash = /[^\/]*$/;
 
@@ -11,7 +24,9 @@ let options = {
     cert: fs.readFileSync(__dirname + '/server.crt')
 };
 
-spdy.createServer(options, function(req, res) {
+const PORT = 3000;
+
+PROTOCOL.createServer(options, function(req, res) {
 	if (req.url === '/it') {
         res.writeHead(200, {'Content-Type': 'text/html'});
         fs.createReadStream('it.html').pipe(res);
@@ -22,6 +37,8 @@ spdy.createServer(options, function(req, res) {
     	fs.createReadStream(imagePath).pipe(res);			
     } else {
     	res.writeHead(200);
-    	res.end('Hello world over HTTP/2');	
+    	res.end(`Hello world over ${protocolName}`);	
     }  
-}).listen(3000);
+}).listen(PORT);
+
+console.log(`Server port: ${PORT} and ${protocolName}`);
