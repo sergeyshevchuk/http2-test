@@ -1,1 +1,1 @@
-for i in {1..200}; do curl -o ${i} https://unsplash.it/60/60?random done
+for i in {1..200}; do curl -o ${i} http://loremflickr.com/1024/1024?random=${i} done

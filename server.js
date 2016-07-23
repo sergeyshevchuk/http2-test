@@ -31,10 +31,16 @@ PROTOCOL.createServer(options, function(req, res) {
         res.writeHead(200, {'Content-Type': 'text/html'});
         fs.createReadStream('it.html').pipe(res);
     } else if(req.url.includes('images')){
-    	res.writeHead(200);
     	const imageId = req.url.match(afterLastSlash)[0];
-    	const imagePath = path.resolve('./images', imageId)
-    	fs.createReadStream(imagePath).pipe(res);			
+    	const imagePath = path.resolve('./images', imageId);
+        fs.createReadStream(imagePath)
+            .on('error', (err) => {
+                console.log(err);
+                res.writeHead(404, {'Content-Type': 'text/plain'});
+                res.end('404 Not Found\n');
+            })
+            .pipe(res);
+    
     } else {
     	res.writeHead(200);
     	res.end(`Hello world over ${protocolName}`);	
